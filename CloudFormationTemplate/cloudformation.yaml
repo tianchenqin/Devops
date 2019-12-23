@@ -1,0 +1,50 @@
+Mappings:           #the name RegionMap will be quoted by "Resources"
+  Regionmap:
+    eu-central-1:
+      AMI: ami-010fae13a16763bb4
+    ap-southeast-1:
+      AMI: ami-05c859630889c79c8
+Parameters:
+  NameOfStack:
+    Description: The name of the stack
+    Type: String
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      InstanceType: t2.micro             
+      ImageId: "ami-010fae13a16763bb4"  ##AWZ AMI ID
+      Tags:
+        - 
+          Key: Owner
+          Value: Tianchen
+        - 
+          Key:  'Instance Region'
+          Value: !Join
+            - ""
+            - - 'TQInstance in'
+              - !Ref AWS::StackId
+              - 'in'
+              - !Ref AWS::Region
+      SecurityGroupIds: 
+        - sg-6c9d5d04
+      SubnetId: subnet-cff6e3a6
+  TQSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: This group is to allow 3389 and 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+
+  
+      
+
+      
+
+
+  
+        
