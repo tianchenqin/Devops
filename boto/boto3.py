@@ -1,3 +1,7 @@
+##First thing first, import boto3 python module
+import boto3
+import sys
+
 session = boto3.session(profile_name='default')  #this part is to create a session object with 'Default' profile KeyName
 s3object = session.resource('s3')  #create a s3 object with AWS resource type s3
 
