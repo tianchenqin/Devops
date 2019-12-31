@@ -1,6 +1,8 @@
 ##First thing first, import boto3 python module
 import click
 import boto3
+from botocore.exceptions import ClientError
+from pathlib import Path 
 
 session = boto3.Session(profile_name='default')
 print(session)
@@ -30,10 +32,46 @@ def list_buckets():
         print(bucketobjects)
 
 @cli.command('list-bucket-object')
-def list_bucket_objects():
+@click.argument('bucket')
+def list_bucket_objects(bucket):
     "list objects in an s3 bucket"
-    for obj in s3.Bucket('tianchenboto').objects.all():
+    for obj in s3.Bucket(bucket).objects.all():
         print(obj)
+
+@cli.command('setup-bucket')
+@click.argument('bucket')
+def setup_bucket(bucket):
+    "create and configure S3 bucket"
+    thisbucket = s3.Bucket(bucket)
+    policy = """
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws-cn:s3:::%s/*"
+        }
+    ]
+    }
+    """ % thisbucket.name
+    
+    policy = policy.strip()
+    pol = thisbucket.Policy()
+    pol.put(Policy = policy)
+
+    ws = thisbucket.Website()
+    ws.put(WebsiteConfiguration={
+        'ErrorDocument': {
+            'Key': 'error.html'
+        },
+        'IndexDocument': {
+            'Suffix': 'index.html'
+        }
+    })
+    return
 
 if __name__ == '__main__':
     cli()
