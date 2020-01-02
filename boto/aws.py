@@ -4,7 +4,7 @@ import boto3
 from botocore.exceptions import ClientError
 from pathlib import Path 
 
-session = boto3.Session(profile_name='default')
+session = boto3.Session(profile_name='tianchen')
 print(session)
 s3 = session.resource('s3')
 
