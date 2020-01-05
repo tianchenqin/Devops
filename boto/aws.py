@@ -11,10 +11,10 @@ s3 = session.resource('s3')
 print(s3)
 
 ##the below sample is to list all buckets in S3
-'''
-for bucketobjects in s3.buckets.all():
-    print(bucketobjects)
-'''
+
+# for bucketobjects in s3.buckets.all():
+#     print(bucketobjects)
+
 ## create a S3 bucket
 
 #new_bucket = s3.create_bucket(Bucket='tianchenboto', CreateBucketConfiguration={'LocationConstraint': session.region_name})
