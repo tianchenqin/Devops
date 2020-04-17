@@ -4,6 +4,11 @@ provider "aws" {
   secret_key = "CW934fb4pFrBfEtqE/BUzewfTFkU4PwgFFmWD/yq"
 }
 
+variable "web_port"{
+  description = "the server port to receive http requests"
+  type = number
+  default = 8080
+}
 resource "aws_instance" "TQFirstInstance" {
   ami           = "ami-0e855a53ec7c8057e"
   instance_type = "t2.micro"
@@ -22,8 +27,8 @@ resource "aws_instance" "TQFirstInstance" {
 resource "aws_security_group" "webserverSG" {
   name = "terraform-example-instance"
   ingress {
-    from_port = 8080
-    to_port = 8080
+    from_port = var.web_port
+    to_port = var.web_port
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
