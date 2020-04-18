@@ -16,9 +16,11 @@ resource "aws_instance" "TQFirstInstance" {
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello World" > index.html
-              nohup busybox httpd -f -p 8080 &
+              nohup busybox httpd -f -p ${var.web_port} &
               EOF
-
+  lifecycle {
+    create_before_destroy = true
+  }
   tags = {
     Name = "terraform-example"
   }	
@@ -32,4 +34,43 @@ resource "aws_security_group" "webserverSG" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_s3_bucket" "terraform_state_store" {
+  bucket = "terraformstatetianchentest"
+  
+  #prevent accidental deletion of this S3 bucket
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  #Enable versioning so we can see the histroy
+  versioning {
+    enabled = true
+  }
+
+  #Enable server-side encryption by default
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name = "terraformstatetianchentest-locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+}
+
+output "public_ip" {
+  value = aws_instance.TQFirstInstance.public_ip
+  description = "server port display"
 }
