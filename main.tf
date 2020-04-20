@@ -70,6 +70,19 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+terraform {
+  backend "s3" {
+     #the configuration of my S3 backend!
+     bucket = "terraformstatetianchentest"
+     key = "global/s3/terraform.tfstate"
+     region = "cn-north-1"
+
+     # the configuration of dynamodb
+     dynamodb_table = "terraformstatetianchentest-locks"
+     encrypt = true
+
+  }
+}
 output "public_ip" {
   value = aws_instance.TQFirstInstance.public_ip
   description = "server port display"
