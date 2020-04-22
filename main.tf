@@ -1,14 +1,16 @@
 provider "aws" {
   region = "cn-north-1"
-  access_key = "AKIATOXEOJWQKIGKYJ72"
-  secret_key = "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"
+  shared_credentials_file = "/root/.aws/credentials"
+  profile = "default"
+#  access_key = "AKIATOXEOJWQKIGKYJ72"
+#  secret_key = "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"
 }
 
-variable "web_port"{
-  description = "the server port to receive http requests"
-  type = number
-  default = 8080
-}
+#variable "web_port"{
+#  description = "the server port to receive http requests"
+#  type = number
+#  default = 8080
+#}
 resource "aws_instance" "TQFirstInstance" {
   ami           = "ami-0e855a53ec7c8057e"
   instance_type = "t2.micro"
@@ -73,17 +75,18 @@ resource "aws_dynamodb_table" "terraform_locks" {
 terraform {
   backend "s3" {
      #the configuration of my S3 backend!
-     bucket = "terraformstatetianchentest"
-     key = "global/s3/terraform.tfstate"
-     region = "cn-north-1"
+     key = "terraform.tfstate"
 
-     # the configuration of dynamodb
-     dynamodb_table = "terraformstatetianchentest-locks"
-     encrypt = true
 
   }
 }
+
+data "aws_secretsmanager_secret_version" "rootpass"{
+  secret_id = "cnawsroot"
+}
+
 output "public_ip" {
   value = aws_instance.TQFirstInstance.public_ip
   description = "server port display"
 }
+
