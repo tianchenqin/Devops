@@ -6,11 +6,14 @@ provider "aws" {
 #  secret_key = "CW934fb4pFrBfEtqE/BUzewfTFkU4PwgFFmWD/yq"
 }
 
-#variable "web_port"{
-#  description = "the server port to receive http requests"
-#  type = number
-#  default = 8080
-#}
+/*
+variable "web_port"{
+  description = "the server port to receive http requests"
+  type = number
+  default = 8080
+}
+*/
+
 resource "aws_instance" "TQFirstInstance" {
   ami           = "ami-0e855a53ec7c8057e"
   instance_type = "t2.micro"
@@ -38,12 +41,39 @@ resource "aws_security_group" "webserverSG" {
   }
 }
 
+resource "aws_launch_configuration" "asgconfig" {
+  image_id = "ami-0e855a53ec7c8057e"
+  instance_type = "t2.micro"
+  security_groups = [aws_security_group.webserverSG.id]
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "Hello World" > index.html
+              nohup busybox httpd -f -p ${var.web_port} &
+              EOF
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "webserverasg" {
+  launch_configuration = aws_launch_configuration.asgconfig.name
+  
+  min_size = 2
+  max_size = 10
+
+  tag {
+    key = "Name"
+    value = "terraform-asg-example"
+    propagate_at_launch = true
+  }
+}
+
 resource "aws_s3_bucket" "terraform_state_store" {
   bucket = "terraformstatetianchentest"
   
   #prevent accidental deletion of this S3 bucket
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   #Enable versioning so we can see the histroy
@@ -72,6 +102,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
   }
 }
 
+/*
 terraform {
   backend "s3" {
      #the configuration of my S3 backend!
@@ -80,13 +111,16 @@ terraform {
 
   }
 }
+*/
 
 data "aws_secretsmanager_secret_version" "rootpass"{
   secret_id = "cnawsroot"
 }
 
+/*
 output "public_ip" {
   value = aws_instance.TQFirstInstance.public_ip
   description = "server port display"
 }
+*/
 
